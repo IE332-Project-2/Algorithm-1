@@ -8,33 +8,66 @@ install_tensorflow(extra_packages="pillow")
 
 setwd("/Users/hallelin/Library/CloudStorage/OneDrive-purdue.edu/SPRING 2023/IE332/Project 2")
 
-noise_change <- function(x,P){
+random_pix_change <- function(x,P){
   x_size <- length(x[,1,1])
   y_size <- length(x[1,,1])
-  
+
   percent <- P
   max_pixels <- x_size * y_size * percent
+
+  max_bundles <- floor(max_pixels / 9)
+
+  x_coords = c(floor(runif(max_bundles, min = 0, max = x_size)))
+  y_coords = c(floor(runif(max_bundles, min = 0, max = y_size)))
+
+if(max_bundles > 0 ){
+for(i in 1:max_bundles){
+  red = round(runif(1,min = 0,max = 1),1)
+  green = round(runif(1,min = 0,max = 1),1)
+  blue = round(runif(1,min = 0,max = 1),1)
   
-  x_coords = c(floor(runif(max_pixels, min = 0, max = x_size)))
-  y_coords = c(floor(runif(max_pixels, min = 0, max = y_size)))
+  xindex = x_coords[i]
+  yindex = y_coords[i]
   
-  newx = x * 0 
+  x[xindex,yindex,1] <- red #modifies red value
+  x[xindex,yindex,2] <- green #modifies green value
+  x[xindex,yindex,3] <- blue #modifies blue value
   
-  if(max_pixels > 0 ){
-    for(i in 1:max_bundles){
-      red = round(runif(1,min = 0,max = 1),1)
-      green = round(runif(1,min = 0,max = 1),1)
-      blue = round(runif(1,min = 0,max = 1),1)
-      
-      xindex = x_coords[i]
-      yindex = y_coords[i]
-      
-      newx[xindex,yindex,1] <- red #modifies red value
-      newx[xindex,yindex,2] <- green #modifies green value
-      newx[xindex,yindex,3] <- blue #modifies blue value
-    }
-  }
-  writeJPEG(x, "./noise.jpg")
+  x[xindex+1,yindex,1] <- red #modifies red value
+  x[xindex+1,yindex,2] <- green #modifies green value
+  x[xindex+1,yindex,3] <- blue #modifies blue value
+  
+  x[xindex-1,yindex,1] <- red #modifies red value
+  x[xindex-1,yindex,2] <- green #modifies green value
+  x[xindex-1,yindex,3] <- blue #modifies blue value
+  
+  x[xindex,yindex-1,1] <- red #modifies red value
+  x[xindex,yindex-1,2] <- green #modifies green value
+  x[xindex,yindex-1,3] <- blue #modifies blue value
+  
+  x[xindex,yindex+1,1] <- red #modifies red value
+  x[xindex,yindex+1,2] <- green #modifies green value
+  x[xindex,yindex+1,3] <- blue #modifies blue value
+  
+  x[xindex+1,yindex+1,1] <- red #modifies red value
+  x[xindex+1,yindex+1,2] <- green #modifies green value
+  x[xindex+1,yindex+1,3] <- blue #modifies blue value
+  
+  x[xindex-1,yindex+1,1] <- red #modifies red value
+  x[xindex-1,yindex+1,2] <- green #modifies green value
+  x[xindex-1,yindex+1,3] <- blue #modifies blue value
+  
+  x[xindex-1,yindex-1,1] <- red #modifies red value
+  x[xindex-1,yindex-1,2] <- green #modifies green value
+  x[xindex-1,yindex-1,3] <- blue #modifies blue value
+  
+  x[xindex-1,yindex+1,1] <- red #modifies red value
+  x[xindex-1,yindex+1,2] <- green #modifies green value
+  x[xindex-1,yindex+1,3] <- blue #modifies blue value
+}
+}
+writeJPEG(x, "./mode.jpg")
+
 }
 
 target_size <- c(224, 224)
@@ -43,16 +76,16 @@ res=c("","")
 f=list.files("./dandelions")
 for (i in f){
   test_image <- image_load(paste("./dandelions/",i,sep="")
-  )
+                           )
   x <- image_to_array(test_image)
   x <- x/255
   
   #change the image
   P <- .01
-  noise_change(x, P)
+  random_pix_change(x, P)
   
   #load the new image
-  new_img <- image_load("./noise.jpg",
+  new_img <- image_load("./mode.jpg",
                         target_size = target_size)
   new <- image_to_array(new_img)
   new <- array_reshape(new, c(1, dim(new)))
@@ -60,6 +93,4 @@ for (i in f){
   x <- array_reshape(x, c(1, dim(x)))
   pred <- model %>% predict(new)
   print(pred)
-}  
-
-#hello goodbye
+}             
